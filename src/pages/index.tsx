@@ -1,7 +1,7 @@
 import { Box, Button, Text, TextField, Image } from "@skynexui/components";
 import { useRouter } from "next/router";
 import { useState } from "react";
-import appConfig from "../../config.json";
+import appConfig from "../config.json";
 
 function Titulo(props) {
   const Tag = props.tag || "h1";
@@ -93,6 +93,7 @@ export default function PaginaInicial() {
               fullWidth
               value={githubName}
               onChange={handleChange}
+              // @ts-ignore
               textFieldColors={{
                 neutral: {
                   textColor: appConfig.theme.colors.neutrals[200],
