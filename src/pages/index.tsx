@@ -1,13 +1,17 @@
 import { Box, Button, Text, TextField, Image } from "@skynexui/components";
 import { useRouter } from "next/router";
-import { useState } from "react";
+import { ReactNode, useState } from "react";
 import appConfig from "../config.json";
 
-function Titulo(props) {
-  const Tag = props.tag || "h1";
+type TituloProps = {
+  children: ReactNode;
+  tag: string;
+};
+function Titulo({ children, tag }: TituloProps) {
+  const Tag = tag || "h1";
   return (
     <>
-      <Tag>{props.children}</Tag>
+      <Tag>{children}</Tag>
       <style jsx>{`
         ${Tag} {
           color: ${appConfig.theme.colors.neutrals["000"]};
@@ -20,14 +24,14 @@ function Titulo(props) {
 }
 
 export default function PaginaInicial() {
-  const [githubName, setGithubName] = useState();
+  const [githubName, setGithubName] = useState<string>("");
   const router = useRouter();
 
-  const handleChange = (event) => {
-    setGithubName(event.target.value);
+  const handleChange = (value: string) => {
+    setGithubName(value);
   };
 
-  const handleSubmit = (event) => {
+  const handleSubmit = (event: Event) => {
     event.preventDefault();
     router.push("/chat");
   };
@@ -39,6 +43,7 @@ export default function PaginaInicial() {
           alignItems: "center",
           justifyContent: "center",
           backgroundColor: appConfig.theme.colors.primary[500],
+          // @ts-ignore
           backgroundImage:
             "url(https://img.wallpapersafari.com/desktop/1920/1080/48/42/ADS1OV.jpg)",
           backgroundRepeat: "no-repeat",
@@ -67,7 +72,8 @@ export default function PaginaInicial() {
           {/* Formulário */}
           <Box
             as="form"
-            onSubmit={handleSubmit}
+            // @ts-ignore
+            onSubmit={(event: Event) => handleSubmit(event)}
             styleSheet={{
               display: "flex",
               flexDirection: "column",
@@ -92,7 +98,7 @@ export default function PaginaInicial() {
             <TextField
               fullWidth
               value={githubName}
-              onChange={handleChange}
+              onChange={(event) => handleChange(event.target.value)}
               // @ts-ignore
               textFieldColors={{
                 neutral: {
@@ -129,6 +135,7 @@ export default function PaginaInicial() {
               borderColor: appConfig.theme.colors.neutrals[999],
               borderRadius: "10px",
               flex: 1,
+              // @ts-ignore
               minHeight: "240px",
               marginLeft: "16px",
             }}
