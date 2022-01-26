@@ -1,12 +1,40 @@
 import { Box, Text, TextField, Image, Button } from "@skynexui/components";
-import React from "react";
+import React, { KeyboardEvent, useState } from "react";
+import { MdSend } from "react-icons/md";
+import { v4 as uuidv4 } from "uuid";
 import appConfig from "../config.json";
 import { BACKGROUND_IMAGE } from "../constants/general";
+import { messages } from "../mocks/message";
 
 export default function ChatPage() {
-  // Sua lógica vai aqui
+  const [inputMessage, setInputMessage] = useState<string>("");
+  const [messagesList, setMessagesList] = useState<Message[]>(messages);
+  const handleInputMessage = (text: string) => {
+    setInputMessage(text);
+  };
 
-  // ./Sua lógica vai aqui
+  const handleKeyPressMessage = (event: KeyboardEvent) => {
+    if (event.key === "Enter") {
+      event.preventDefault();
+      const newMessage: Message = {
+        id: uuidv4(),
+        sender: "Caique Roschel",
+        text: inputMessage,
+      };
+      setMessagesList([newMessage, ...messagesList]);
+      setInputMessage("");
+    }
+  };
+
+  const handleSendMessage = () => {
+    const newMessage: Message = {
+      id: uuidv4(),
+      sender: "Caique Roschel",
+      text: inputMessage,
+    };
+    setMessagesList([newMessage, ...messagesList]);
+    setInputMessage("");
+  };
   return (
     <Box
       styleSheet={{
@@ -30,8 +58,8 @@ export default function ChatPage() {
           boxShadow: "0 2px 10px 0 rgb(0 0 0 / 20%)",
           borderRadius: "5px",
           backgroundColor: appConfig.theme.colors.neutrals[700],
-          height: "100%",
-          maxWidth: "95%",
+          height: "80%",
+          maxWidth: "80%",
           // @ts-ignore
           maxHeight: "95vh",
           padding: "32px",
@@ -50,7 +78,7 @@ export default function ChatPage() {
             padding: "16px",
           }}
         >
-          {/* <MessageList mensagens={[]} /> */}
+          <MessageList messages={messagesList} />
 
           <Box
             as="form"
@@ -61,17 +89,33 @@ export default function ChatPage() {
           >
             <TextField
               placeholder="Insira sua mensagem aqui..."
+              value={inputMessage}
+              onChange={(event) => handleInputMessage(event.target.value)}
+              onKeyPress={(event: KeyboardEvent) =>
+                handleKeyPressMessage(event)
+              }
               type="textarea"
               name={""}
               styleSheet={{
+                display: "flex",
                 width: "100%",
                 border: "0",
-                resize: "none",
+
                 borderRadius: "5px",
                 padding: "6px 8px",
                 backgroundColor: appConfig.theme.colors.neutrals[800],
                 marginRight: "12px",
                 color: appConfig.theme.colors.neutrals[200],
+              }}
+            />
+            <Button
+              iconName="arrowRight"
+              label=""
+              colorVariant="primary"
+              onClick={() => handleSendMessage()}
+              styleSheet={{
+                display: "flex",
+                marginBottom: "8px",
               }}
             />
           </Box>
@@ -105,14 +149,18 @@ function Header() {
   );
 }
 
-function MessageList(props: any) {
-  console.log("MessageList", props);
-  const { message } = props;
+type MessageProps = {
+  messages: Message[];
+};
+
+function MessageList(props: MessageProps) {
+  const { messages } = props;
+
   return (
     <Box
       tag="ul"
       styleSheet={{
-        overflow: "scroll",
+        overflow: "auto",
         display: "flex",
         flexDirection: "column-reverse",
         flex: 1,
@@ -120,47 +168,49 @@ function MessageList(props: any) {
         marginBottom: "16px",
       }}
     >
-      <Text
-        key={message.id}
-        tag="li"
-        styleSheet={{
-          borderRadius: "5px",
-          padding: "6px",
-          marginBottom: "12px",
-          hover: {
-            backgroundColor: appConfig.theme.colors.neutrals[700],
-          },
-        }}
-      >
-        <Box
+      {messages.map((message) => (
+        <Text
+          key={message.id}
+          tag="li"
           styleSheet={{
-            marginBottom: "8px",
+            borderRadius: "5px",
+            padding: "6px",
+            marginBottom: "12px",
+            hover: {
+              backgroundColor: appConfig.theme.colors.neutrals[700],
+            },
           }}
         >
-          <Image
+          <Box
             styleSheet={{
-              width: "20px",
-              height: "20px",
-              borderRadius: "50%",
-              display: "inline-block",
-              marginRight: "8px",
+              marginBottom: "8px",
             }}
-            src={`https://github.com/vanessametonini.png`}
-          />
-          <Text tag="strong">{message.de}</Text>
-          <Text
-            styleSheet={{
-              fontSize: "10px",
-              marginLeft: "8px",
-              color: appConfig.theme.colors.neutrals[300],
-            }}
-            tag="span"
           >
-            {new Date().toLocaleDateString()}
-          </Text>
-        </Box>
-        {message.texto}
-      </Text>
+            <Image
+              styleSheet={{
+                width: "20px",
+                height: "20px",
+                borderRadius: "50%",
+                display: "inline-block",
+                marginRight: "8px",
+              }}
+              src={`https://github.com/croschel.png`}
+            />
+            <Text tag="strong">{message.sender}</Text>
+            <Text
+              styleSheet={{
+                fontSize: "10px",
+                marginLeft: "8px",
+                color: appConfig.theme.colors.neutrals[300],
+              }}
+              tag="span"
+            >
+              {new Date().toLocaleDateString()}
+            </Text>
+          </Box>
+          {message.text}
+        </Text>
+      ))}
     </Box>
   );
 }
