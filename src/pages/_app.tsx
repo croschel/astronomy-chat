@@ -1,3 +1,5 @@
+import { AppProps } from "next/app";
+
 function GlobalStyle() {
   return (
     <style global jsx>
@@ -28,7 +30,7 @@ function GlobalStyle() {
   );
 }
 
-function MyApp({ Component, pageProps }) {
+function MyApp({ Component, pageProps }: AppProps) {
   return (
     <>
       <GlobalStyle />

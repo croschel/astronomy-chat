@@ -2,18 +2,26 @@ import { Box, Button, Text, TextField, Image } from "@skynexui/components";
 import { useRouter } from "next/router";
 import { ReactNode, useState } from "react";
 import appConfig from "../config.json";
+import { apiGithub } from "../services/api";
 
-type TituloProps = {
+interface GithubUser {
+  name: string;
+  username: string;
+  location: string;
+  company: string;
+  avatar_url: string;
+}
+
+type TitleProps = {
   children: ReactNode;
   tag: string;
 };
-function Titulo({ children, tag }: TituloProps) {
-  const Tag = tag || "h1";
+function Title({ children }: TitleProps) {
   return (
     <>
-      <Tag>{children}</Tag>
+      <h1>{children}</h1>
       <style jsx>{`
-        ${Tag} {
+        h1 {
           color: ${appConfig.theme.colors.neutrals["000"]};
           font-size: 24px;
           font-weight: 600;
@@ -24,17 +32,39 @@ function Titulo({ children, tag }: TituloProps) {
 }
 
 export default function PaginaInicial() {
+  const emptyUser = {
+    name: "",
+    username: "",
+    location: "",
+    company: "",
+    avatar_url: "",
+  };
+
   const [githubName, setGithubName] = useState<string>("");
+  const [user, setUser] = useState<GithubUser>(emptyUser);
   const router = useRouter();
 
-  const handleChange = (value: string) => {
+  const handleChange = async (value: string) => {
     setGithubName(value);
+    try {
+      const response = await apiGithub.get(`users/${value}`);
+      setUser({
+        name: response.data.name,
+        username: response.data.login,
+        location: response.data.location,
+        company: response.data.company,
+        avatar_url: response.data.avatar_url,
+      });
+    } catch (error) {
+      console.log(error);
+    }
   };
 
   const handleSubmit = (event: Event) => {
     event.preventDefault();
     router.push("/chat");
   };
+
   return (
     <>
       <Box
@@ -61,8 +91,9 @@ export default function PaginaInicial() {
               sm: "row",
             },
             width: "100%",
-            maxWidth: "700px",
+
             borderRadius: "5px",
+            maxWidth: githubName ? "700px" : "400px",
             padding: "32px",
             margin: "16px",
             boxShadow: "0 2px 10px 0 rgb(0 0 0 / 20%)",
@@ -76,6 +107,7 @@ export default function PaginaInicial() {
             onSubmit={(event: Event) => handleSubmit(event)}
             styleSheet={{
               display: "flex",
+              flex: 1,
               flexDirection: "column",
               alignItems: "center",
               justifyContent: "center",
@@ -84,7 +116,7 @@ export default function PaginaInicial() {
               marginBottom: "32px",
             }}
           >
-            <Titulo tag="h2">Boas vindas de volta!</Titulo>
+            <Title tag="h2">Boas vindas de volta!</Title>
             <Text
               variant="body3"
               styleSheet={{
@@ -124,41 +156,43 @@ export default function PaginaInicial() {
           {/* Formulário */}
 
           {/* Photo Area */}
-          <Box
-            styleSheet={{
-              display: "flex",
-              flexDirection: "column",
-              alignItems: "center",
-              padding: "16px",
-              backgroundColor: appConfig.theme.colors.neutrals[800],
-              border: "1px solid",
-              borderColor: appConfig.theme.colors.neutrals[999],
-              borderRadius: "10px",
-              flex: 1,
-              // @ts-ignore
-              minHeight: "240px",
-              marginLeft: "16px",
-            }}
-          >
-            <Image
+          {githubName.length > 2 && (
+            <Box
               styleSheet={{
-                borderRadius: "50%",
-                marginBottom: "16px",
-              }}
-              src={`https://github.com/${githubName}.png`}
-            />
-            <Text
-              variant="body4"
-              styleSheet={{
-                color: appConfig.theme.colors.neutrals[200],
-                backgroundColor: appConfig.theme.colors.neutrals[900],
-                padding: "3px 10px",
-                borderRadius: "1000px",
+                display: "flex",
+                flexDirection: "column",
+                alignItems: "center",
+                padding: "16px",
+                backgroundColor: appConfig.theme.colors.neutrals[800],
+                border: "1px solid",
+                borderColor: appConfig.theme.colors.neutrals[999],
+                borderRadius: "10px",
+                flex: 1,
+                // @ts-ignore
+                minHeight: "240px",
+                marginLeft: "16px",
               }}
             >
-              {githubName}
-            </Text>
-          </Box>
+              <Image
+                styleSheet={{
+                  borderRadius: "50%",
+                  marginBottom: "16px",
+                }}
+                src={user.avatar_url}
+              />
+              <Text
+                variant="body4"
+                styleSheet={{
+                  color: appConfig.theme.colors.neutrals[200],
+                  backgroundColor: appConfig.theme.colors.neutrals[900],
+                  padding: "3px 10px",
+                  borderRadius: "1000px",
+                }}
+              >
+                {githubName}
+              </Text>
+            </Box>
+          )}
           {/* Photo Area */}
         </Box>
       </Box>
