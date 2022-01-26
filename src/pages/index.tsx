@@ -189,7 +189,7 @@ export default function PaginaInicial() {
                   borderRadius: "1000px",
                 }}
               >
-                {githubName}
+                {user.name}
               </Text>
             </Box>
           )}
