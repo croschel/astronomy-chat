@@ -2,6 +2,7 @@ import { Box, Button, Text, TextField, Image } from "@skynexui/components";
 import { useRouter } from "next/router";
 import { ReactNode, useState } from "react";
 import appConfig from "../config.json";
+import { BACKGROUND_IMAGE } from "../constants/general";
 import { apiGithub } from "../services/api";
 
 interface GithubUser {
@@ -74,8 +75,7 @@ export default function PaginaInicial() {
           justifyContent: "center",
           backgroundColor: appConfig.theme.colors.primary[500],
           // @ts-ignore
-          backgroundImage:
-            "url(https://img.wallpapersafari.com/desktop/1920/1080/48/42/ADS1OV.jpg)",
+          backgroundImage: BACKGROUND_IMAGE,
           backgroundRepeat: "no-repeat",
           backgroundSize: "cover",
           backgroundBlendMode: "multiply",
