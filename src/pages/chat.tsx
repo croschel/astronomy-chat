@@ -1,6 +1,5 @@
 import { Box, Text, TextField, Image, Button } from "@skynexui/components";
-import React, { KeyboardEvent, useState } from "react";
-import { MdSend } from "react-icons/md";
+import React, { KeyboardEvent, useEffect, useRef, useState } from "react";
 import { v4 as uuidv4 } from "uuid";
 import appConfig from "../config.json";
 import { BACKGROUND_IMAGE } from "../constants/general";
@@ -20,6 +19,7 @@ export default function ChatPage() {
         id: uuidv4(),
         sender: "Caique Roschel",
         text: inputMessage,
+        createdAt: new Date().toLocaleDateString(),
       };
       setMessagesList([newMessage, ...messagesList]);
       setInputMessage("");
@@ -31,6 +31,7 @@ export default function ChatPage() {
       id: uuidv4(),
       sender: "Caique Roschel",
       text: inputMessage,
+      createdAt: new Date().toLocaleDateString(),
     };
     setMessagesList([newMessage, ...messagesList]);
     setInputMessage("");
@@ -78,13 +79,18 @@ export default function ChatPage() {
             padding: "16px",
           }}
         >
-          <MessageList messages={messagesList} />
+          <MessageList
+            messages={messagesList}
+            onDeleteMessage={(newList) => setMessagesList(newList)}
+          />
 
           <Box
             as="form"
             styleSheet={{
               display: "flex",
               alignItems: "center",
+              backgroundColor: appConfig.theme.colors.neutrals[800],
+              borderRadius: "5px",
             }}
           >
             <TextField
@@ -100,7 +106,6 @@ export default function ChatPage() {
                 display: "flex",
                 width: "100%",
                 border: "0",
-
                 borderRadius: "5px",
                 padding: "6px 8px",
                 backgroundColor: appConfig.theme.colors.neutrals[800],
@@ -115,7 +120,10 @@ export default function ChatPage() {
               onClick={() => handleSendMessage()}
               styleSheet={{
                 display: "flex",
-                marginBottom: "8px",
+                maxWidth: "32px",
+                // @ts-ignore
+                maxHeight: "32px",
+                marginRight: "8px",
               }}
             />
           </Box>
@@ -140,7 +148,7 @@ function Header() {
         <Text variant="heading5">Chat</Text>
         <Button
           variant="primary"
-          colorVariant="accent"
+          colorVariant="negative"
           label="Logout"
           href="/"
         />
@@ -151,10 +159,17 @@ function Header() {
 
 type MessageProps = {
   messages: Message[];
+  onDeleteMessage: (list: Message[]) => void;
 };
 
 function MessageList(props: MessageProps) {
-  const { messages } = props;
+  const { messages, onDeleteMessage } = props;
+  const [showDelete, setShowDelete] = useState<boolean>(false);
+
+  const handleDeleteMessage = (id: string) => {
+    const newArray = messages.filter((message) => message.id !== id);
+    onDeleteMessage(newArray);
+  };
 
   return (
     <Box
@@ -170,6 +185,9 @@ function MessageList(props: MessageProps) {
     >
       {messages.map((message) => (
         <Text
+          // @ts-ignore
+          onMouseEnter={() => setShowDelete(true)}
+          onMouseLeave={() => setShowDelete(false)}
           key={message.id}
           tag="li"
           styleSheet={{
@@ -184,29 +202,66 @@ function MessageList(props: MessageProps) {
           <Box
             styleSheet={{
               marginBottom: "8px",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "space-between",
             }}
           >
-            <Image
+            <Box
               styleSheet={{
-                width: "20px",
-                height: "20px",
-                borderRadius: "50%",
-                display: "inline-block",
-                marginRight: "8px",
+                alignItems: "center",
+                display: "flex",
               }}
-              src={`https://github.com/croschel.png`}
-            />
-            <Text tag="strong">{message.sender}</Text>
-            <Text
-              styleSheet={{
-                fontSize: "10px",
-                marginLeft: "8px",
-                color: appConfig.theme.colors.neutrals[300],
-              }}
-              tag="span"
             >
-              {new Date().toLocaleDateString()}
-            </Text>
+              <Image
+                styleSheet={{
+                  width: "20px",
+                  height: "20px",
+                  borderRadius: "50%",
+                  display: "inline-block",
+                  marginRight: "8px",
+                }}
+                src={`https://github.com/croschel.png`}
+              />
+              <Text tag="strong">{message.sender}</Text>
+              <Text
+                styleSheet={{
+                  fontSize: "10px",
+                  marginLeft: "8px",
+                  color: appConfig.theme.colors.neutrals[300],
+                }}
+                tag="span"
+              >
+                {message.createdAt}
+              </Text>
+            </Box>
+            {showDelete && (
+              <Box
+                styleSheet={{
+                  position: "relative",
+                }}
+              >
+                <Button
+                  label=""
+                  iconName="trash"
+                  variant="tertiary"
+                  onClick={() => handleDeleteMessage(message.id)}
+                  styleSheet={{
+                    maxWidth: "20px",
+                    // @ts-ignore
+                    maxHeight: "20px",
+                    hover: {
+                      backgroundColor: "transparent",
+                      color: "#E9400C",
+                    },
+                    focus: {
+                      backgroundColor: "transparent",
+                      color: "#E9400C",
+                    },
+                  }}
+                />
+              </Box>
+            )}
           </Box>
           {message.text}
         </Text>
